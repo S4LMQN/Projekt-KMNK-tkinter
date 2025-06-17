@@ -5,3 +5,8 @@
 - Przycisk do uruchomienia regresji (brak zabezpieczeń itd.)
 - Nowe pojawiające się okno regresji z etykietą
 - Funkcja do czytania pliku .csv zwracająca `dict` o postaci `{'column_name': [values]}`
+
+### Co dalej?
+### Backend
+- Dodanie atrybutów w klasie `Regression`: $R^2$, ...
+- Dodanie funkcji: `test_t_parameter`, `test_f`, `calculate_confidence_interval`
