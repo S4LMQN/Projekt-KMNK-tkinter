@@ -239,37 +239,3 @@ class Matrix:
                     v.append(sum(a[x] * b[x] for x in range(0,len(a))))
             return Matrix(n_cols=other.__n_cols, n_rows=self.__n_rows,values=v)
 
-from random import uniform
-from statistics import covariance
-c1 = [uniform(-1,1) for _ in range(0,100)]
-c2 = [uniform(-1,1) for _ in range(0,100)]
-c3 = [uniform(-1,1) for _ in range(0,100)]
-pack = [c1,c2,c3]
-
-''' Part of MPT:
-covariances = [covariance(a,b) for b in pack for a in pack]
-c_matrix = Matrix(n_cols=3,n_rows=3,values=covariances)
-inverted = c_matrix.inverse()
-p_vals = [sum(inverted.access_column(i)) for i in range(0, 3)]
-portfolio = Matrix(n_cols=1,n_rows=3,values=p_vals)
-print(portfolio)
-portfolio *= 1/sum(inverted.values)
-print(portfolio)
-'''
-
-def multiple_regression(*args: list, y_arg: list):
-    
-    max_len = max(len(argument) for argument in args)
-    if any(len(argument) != max_len for argument in args):
-        raise IndexError()
-    if len(y_arg) != max_len:
-        raise IndexError()
-
-    x = Matrix(n_cols=1, n_rows=max_len,values=[1 for _ in range(0,max_len)])
-    y = Matrix(n_cols=1,n_rows=max_len,values=y_arg)
-    
-    for arg in args:
-        x.append(values=arg, by_row=False)
-
-    return ((x.transpose() * x).inverse() * x.transpose() * y).values
-
