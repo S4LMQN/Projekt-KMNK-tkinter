@@ -273,34 +273,3 @@ def multiple_regression(*args: list, y_arg: list):
 
     return ((x.transpose() * x).inverse() * x.transpose() * y).values
 
-class Regression:
-    def __init__(self, **samples):
-        for key, value in samples.items():
-            self.samples[key] = value
-
-        self.parameters = multiple_regression()
-
-        self.res = self.residues()
-
-    def residues(self):
-        pass    
-
-from statistics import variance, linear_regression
-
-p = multiple_regression(c2, y_arg=c1)
-print(p)
-print(linear_regression(c2, c1))
-emp_vals = []
-sum = 0
-res_sum = 0
-'''
-for i in range(len(c1)):
-    emp_val = p[0] + c1[i]*p[1]
-    print(f'{i}: {c1[i]} = {emp_val}')
-    res_sum += (c1[i] - emp_val)**2
-    emp_vals.append(emp_val)
-print(f'Variance of y: {variance(c1)}')
-print(f'Variance of y_hat: {variance(emp_vals)}')
-print(f'SS of model: {res_sum}')
-'''
-
