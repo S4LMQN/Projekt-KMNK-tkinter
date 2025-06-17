@@ -10,9 +10,8 @@ def read_csv(file_path):
         raise FileExistsError("Plik nie jest typu .csv")
     
     dictionary = {}
-    with open(file_path, 'r') as f:
-        d = csv.DictReader(f)
-        headers = d.fieldnames
+    with open(file_path, 'r', encoding='utf-8-sig') as f:
+        d = csv.DictReader(f, delimiter=',')
         for row in d:
             for key, value in row.items():
                 if key not in dictionary.keys():
