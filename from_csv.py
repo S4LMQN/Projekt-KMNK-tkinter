@@ -2,7 +2,7 @@ import csv
 from os import path
 import re
 
-def unpack(file_path):
+def read_csv(file_path):
     if not path.exists(file_path):
         raise FileNotFoundError('Nieprawidłowa ściezka do pliku')
     
