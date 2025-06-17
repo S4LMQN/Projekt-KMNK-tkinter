@@ -1,7 +1,3 @@
-
-y = [1, 2, 3 ,4, 1, 1, 4]
-x = [3, 4, 5, 6, 2, 3, 4]
-
 from Matrices import *
 from statistics import *
 
@@ -49,34 +45,6 @@ class Regression:
     
     def phi_sq(self):
         return self.ssr()/(variance(self.y)*len(self.y))
-
-
-
-from random import uniform
-from statistics import variance
-c1 = [uniform(-1,1) for _ in range(0,100)]
-c2 = [uniform(-1,1) for _ in range(0,100)]
-c3 = [uniform(-1,1) for _ in range(0,100)]
-pack = [c1,c2,c3]
-
-
-
-emp_vals = []
-sum = 0
-res_sum = 0
-'''
-for i in range(len(c1)):
-    emp_val = p[0] + c1[i]*p[1]
-    print(f'{i}: {c1[i]} = {emp_val}')
-    res_sum += (c1[i] - emp_val)**2
-    emp_vals.append(emp_val)
-print(f'Variance of y: {variance(c1)}')
-print(f'Variance of y_hat: {variance(emp_vals)}')
-print(f'SS of model: {res_sum}')
-'''
-
-r = Regression(x, y=y)
-print(r.parameters())
 
 
 
