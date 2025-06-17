@@ -1,1 +1,1 @@
-# Econometrics
+# Least squares regression GUI app
