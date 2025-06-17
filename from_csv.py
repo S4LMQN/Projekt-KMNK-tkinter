@@ -21,5 +21,3 @@ def read_csv(file_path):
                     dictionary[key].append(value)
     
     return dictionary
-
-print(unpack("test.csv"))
