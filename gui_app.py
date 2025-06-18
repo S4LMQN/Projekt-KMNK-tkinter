@@ -1,4 +1,5 @@
 import tkinter
+# import from_csv
 
 
 class LinearRegressionApp():
@@ -9,16 +10,19 @@ class LinearRegressionApp():
         # Tworzenie głównego okna aplikacji
         self.window = tkinter.Tk()
         self.window.title("Regresja liniowa")
-        self.window.geometry("1200x800")
+        self.window.geometry("800x800")
 
-        # Budowanie obiektów interfejsu użytkownika
+
+
+        # Budowanie wszystkich obiektów interfejsu użytkownika
         self.buildVariableFrame()
+        self.buildRegressionButton()
 
         # Uruchomienie głównej pętli aplikacji
         self.window.mainloop()
 
-
     # Funkcja tworząca ramkę do wyboru zmiennych
+
     def buildVariableFrame(self):
 
         # Ramka główna
@@ -32,12 +36,13 @@ class LinearRegressionApp():
             side="left",
             padx=25
         )
+        # Zapobiega zmianie rozmiaru okna na podstawie jego zawartości
         variableFrame.pack_propagate(False)
 
         # Ramka górna dla etykiet
         topLabelsFrame = tkinter.Frame(
             variableFrame,
-            bg="blue",
+            bg="lightgrey",
             width=370,
             height=50
         )
@@ -57,6 +62,32 @@ class LinearRegressionApp():
             side="left",
             padx=10,
             pady=5
+        )
+
+        # Ramka listy wszystkich zmiennych
+        wszystkieZmienneListaFrame = tkinter.Frame(
+            variableFrame,
+            bg="blue",
+            width=115,
+            height=400
+        )
+        wszystkieZmienneListaFrame.pack(
+            side="left",
+            padx=10,
+            pady=10,
+        )
+        wszystkieZmienneListaFrame.pack_propagate(False)
+        
+        # Lista wszystkich zmiennych
+        wszystkiZmienneLista = tkinter.Listbox(
+            wszystkieZmienneListaFrame,
+            height=400,
+            bg="white",
+            font=("Arial", 10),
+            selectmode='single'
+        )
+        wszystkiZmienneLista.pack(
+            anchor='nw',
         )
 
         # Label, tekst: Zmienna zależna (Y)
@@ -84,6 +115,49 @@ class LinearRegressionApp():
             padx=5,
             pady=50
         )
+
+    # Funkcja budująca przycisk do uruchomienia regresji liniowej
+
+    def buildRegressionButton(self):
+        startRegressionButton = tkinter.Button(
+            self.window,
+            text="Uruchom regresję",
+            command=self.buildRegressionWindow,
+            bg="white",
+            font=("Arial", 12)
+        )
+        startRegressionButton.pack(
+            side="bottom",
+            pady=20
+        )
+
+    # Funkcja budująca okno z wynikami regresji liniowej
+    def buildRegressionWindow(self):
+        # Tworzenie nowego okna
+        regressionWindow = tkinter.Toplevel(self.window)
+        regressionWindow.title("Regresja liniowa")
+        regressionWindow.geometry("800x500")
+
+        # Konfiguracja okna
+        # Okno będzie zawsze na wierzchu okna głównego
+        regressionWindow.transient(self.window)
+        # Blokuje interakcję z głównym oknem, dopóki to nie zostanie zamknięte
+        regressionWindow.grab_set()
+        # Zapobiega zmianie rozmiaru okna na podstawie jego zawartości
+        regressionWindow.pack_propagate(False)
+
+        # Label, Tekst: Regresja liniowa
+        headerLabel = tkinter.Label(
+            regressionWindow,
+            text="Wyniki regresji",
+            font=("Arial", 16, "bold"),
+        )
+        headerLabel.pack(
+            side="top",
+            pady=10
+        )
+    
+    
 
 
 object1 = LinearRegressionApp()
