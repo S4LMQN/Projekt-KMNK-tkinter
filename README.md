@@ -6,6 +6,6 @@
 - Nowe pojawiające się okno regresji z etykietą
 - Funkcja do czytania pliku .csv zwracająca `dict` o postaci `{'column_name': [values]}`
 
-### Dalej - Backend
-- Dodanie atrybutów w klasie `Regression`: $R^2$, ...
-- Dodanie funkcji: `test_t_parameter`, `test_f`, `calculate_confidence_interval`
+### 18.06.2025
+- Backend: Dodano calculate_covariance_matrix, t_student_critical_values.
+- Backend: W klasie Regression zaktualizowano działanie r_sq(), dodano metody sst(), ssr(), sse(), calculate_squared_residual_error(), beta_error(i), calculate_confidence_interval(i), t_test(i), f_test(i).
