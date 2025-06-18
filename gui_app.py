@@ -1,5 +1,7 @@
 import tkinter
-# import from_csv
+import from_csv
+import os
+from tkinter import messagebox
 
 
 class LinearRegressionApp():
@@ -12,14 +14,78 @@ class LinearRegressionApp():
         self.window.title("Regresja liniowa")
         self.window.geometry("800x800")
 
+        # W procesie wybierania zmiennch powstają pola klasy, które przechowują wybrane przez użytkownika zmienne
+        # Ułatwi to późniejsze przekazywanie ich do funkcji regresji liniowej.
+        # Każda zmienna jest nazwą klucza ze słownika pobranego z pliku CSV
+        self.ZmiennaZaleznaDoRegresji = None
+        self.ZmienneNiezalezneDoRegresji = []
 
+        # Lista przechowująca wszystkie zmienne z pliku CSV
+        self.wszystkieZmienneLista = None
+
+        # Słownik przechowujący wszystkie zmienne wraz z obserwacjami z pliku CSV
+        self.SlownikZeWszystkimiZmiennymi = {}
 
         # Budowanie wszystkich obiektów interfejsu użytkownika
-        self.buildVariableFrame()
-        self.buildRegressionButton()
+        self.buildCsvFrame() # Ramka do wczytywania pliku CSV
+        self.buildVariableFrame() # Ramka do wyboru zmiennych
+        self.buildRegressionButton() # Przycisk do uruchomienia regresji liniowej po kliknięciu następuje użycie funkcji buildRegressionWindow()
 
         # Uruchomienie głównej pętli aplikacji
         self.window.mainloop()
+
+    def buildCsvFrame(self):
+        # Ramka główna dla pliku CSV
+        csvFrame = tkinter.Frame(
+            self.window,
+            bg="lightgrey",
+            width=370,
+            height=100,
+        )
+        csvFrame.pack(
+            anchor='nw',
+            padx=25,
+            pady=70
+        )
+        # Zapobiega zmianie rozmiaru okna na podstawie jego zawartości
+        csvFrame.pack_propagate(False)
+
+        # Label, tekst: Podaj nazwę pliku CSV
+        csvLabel = tkinter.Label(
+            csvFrame,
+            text="Podaj nazwę pliku CSV (wraz z rozszerzeniem):",
+            bg="lightgrey",
+            font=("Arial", 10)
+        )
+        csvLabel.pack(
+            side="top",
+            pady=5
+        )
+
+        # Pole tekstowe do wprowadzenia nazwy pliku CSV
+        self.csvEntry = tkinter.Entry(
+            csvFrame,
+            width=30,
+            bg="white",
+            font=("Arial", 10)
+        )
+        self.csvEntry.pack(
+            side="top",
+            padx=5,
+            pady=5)
+
+        # Przycisk do wczytania pliku CSV
+        loadCsvButton = tkinter.Button(
+            csvFrame,
+            text="Wczytaj plik CSV",
+            command=self.loadCsvFile,
+            bg="white",
+        )
+        loadCsvButton.pack(
+            side="top",
+            padx=10,
+            pady=3
+        )
 
     # Funkcja tworząca ramkę do wyboru zmiennych
 
@@ -77,17 +143,128 @@ class LinearRegressionApp():
             pady=10,
         )
         wszystkieZmienneListaFrame.pack_propagate(False)
-        
+
         # Lista wszystkich zmiennych
-        wszystkiZmienneLista = tkinter.Listbox(
+        self.wszystkieZmienneLista = tkinter.Listbox(
             wszystkieZmienneListaFrame,
             height=400,
             bg="white",
             font=("Arial", 10),
             selectmode='single'
         )
-        wszystkiZmienneLista.pack(
+        self.wszystkieZmienneLista.pack(
             anchor='nw',
+        )
+        # Ramka wybranej zmiennej zależnej i niezaleznej wraz z etykietą do niej
+        wybranaZmiennaZaleznaFrame = tkinter.Frame(
+            variableFrame,
+            bg="lightgrey",
+            width=125,
+            height=400
+        )
+        wybranaZmiennaZaleznaFrame.pack(
+            side="right",
+            padx=12,
+            pady=10
+        )
+        wybranaZmiennaZaleznaFrame.pack_propagate(False)
+
+        # Pole tekstowe wybranej zmiennej zależnej
+        self.zmiennaZaleznaEntry = tkinter.Label(
+            wybranaZmiennaZaleznaFrame,
+            width=30,
+            bg="white",
+            font=("Arial", 13)
+        )
+        self.zmiennaZaleznaEntry.pack(
+            side='top',
+            padx=0,
+            pady=0
+        )
+        # Listbox wybranych zmiennych niezależnych
+        self.zmienneNiezalezneEntry = tkinter.Listbox(
+            wybranaZmiennaZaleznaFrame,
+            height=12,
+            bg="white",
+            font=("Arial", 13),
+            selectmode='single'
+        )
+        self.zmienneNiezalezneEntry.pack(
+            side='bottom',
+            padx=0,
+            pady=3
+        )
+
+        # Label, tekst: Zmienne zależne (X)
+        wybranaZmiennaZaleznaLabel = tkinter.Label(
+            wybranaZmiennaZaleznaFrame,
+            text="Zmienne zależne (X)",
+            bg="lightgrey",
+            font=("Arial", 10)
+        )
+        wybranaZmiennaZaleznaLabel.pack(
+            side='bottom',
+            padx=0,
+            pady=0
+        )
+
+        # Ramka przycisków do dodawania zmiennych
+        buttonsFrame = tkinter.Frame(
+            variableFrame,
+            bg="lightgrey",
+            width=60,
+            height=500
+        )
+        buttonsFrame.pack(
+            anchor='nw',
+            padx=10,
+            pady=10,
+        )
+        buttonsFrame.pack_propagate(False)
+
+        # Przycisk do dodania zmiennej zależnej
+        dodajZmiennaZaleznaButton = tkinter.Button(
+            buttonsFrame,
+            command=self.WypiszWybranaZmiennaZalezna,
+            height=3,
+            width=10,
+            bg="lightblue",
+            text="\u2794",
+            font=("Arial", 13)
+        )
+        dodajZmiennaZaleznaButton.pack(
+            side="top",
+            pady=10
+        )
+
+        # Przycisk do usunięcia zmiennej niezależnej
+        usunZmiennaNiezaleznaButton = tkinter.Button(
+            buttonsFrame,
+            command=self.UsunZmiennaNiezalezna,
+            height=3,
+            width=10,
+            bg="lightblue",
+            text="\u2190",
+            font=("Arial", 13, "bold")
+        )
+        usunZmiennaNiezaleznaButton.pack(
+            side="bottom",
+            pady=30
+        )
+
+        # Przycisk do dodania zmiennej niezależnej
+        dodajZmiennaNiezaleznaButton = tkinter.Button(
+            buttonsFrame,
+            command=self.DodajDoWybranychZmiennaNiezalezna,
+            height=3,
+            width=10,
+            bg="lightblue",
+            text="\u2794",
+            font=("Arial", 13)
+        )
+        dodajZmiennaNiezaleznaButton.pack(
+            side="bottom",
+            pady=30
         )
 
         # Label, tekst: Zmienna zależna (Y)
@@ -133,6 +310,11 @@ class LinearRegressionApp():
 
     # Funkcja budująca okno z wynikami regresji liniowej
     def buildRegressionWindow(self):
+
+        # Przypisanie wybranych zmiennych do pól klasy
+        self.ZmiennaZaleznaDoRegresji = self.zmiennaZaleznaEntry.cget('text')
+        self.ZmienneNiezalezneDoRegresji = list(self.zmienneNiezalezneEntry.get(0, tkinter.END))
+
         # Tworzenie nowego okna
         regressionWindow = tkinter.Toplevel(self.window)
         regressionWindow.title("Regresja liniowa")
@@ -156,8 +338,71 @@ class LinearRegressionApp():
             side="top",
             pady=10
         )
-    
-    
+
+
+    def WypiszWybranaZmiennaZalezna(self):
+        if len(self.wszystkieZmienneLista.curselection()) > 0:
+            # Pobranie wybranej zmiennej z label
+            wybranaZmienna = self.wszystkieZmienneLista.get(tkinter.ACTIVE)
+            # Wyświetlenie zmiennej w polu tekstowym
+            self.zmiennaZaleznaEntry.config(text=wybranaZmienna)
+
+        else:
+            messagebox.showerror("Błąd", "Nie wybrano żadnej zmiennej.")
+
+    def DodajDoWybranychZmiennaNiezalezna(self):
+        if len(self.wszystkieZmienneLista.curselection()) > 0:
+            # Pobranie wybranej zmiennej z listy
+            wybranaNiezalezna = self.wszystkieZmienneLista.get(tkinter.ACTIVE)
+
+            # Sprawdzenie, czy zmienna już istnieje w liście zmiennych niezależnych
+            if wybranaNiezalezna not in self.zmienneNiezalezneEntry.get(tkinter.END):
+                # Dodanie zmiennej do listbox zmiennych niezależnych
+                self.zmienneNiezalezneEntry.insert(tkinter.END, wybranaNiezalezna)
+            else:
+                messagebox.showwarning(
+                    "Ostrzeżenie", "Ta zmienna jest już dodana.")
+
+        else:
+            messagebox.showerror("Błąd", "Nie wybrano żadnej zmiennej.")
+        self.ZmienneNiezalezneDoRegresji.append(wybranaNiezalezna)
+
+    def UsunZmiennaNiezalezna(self):
+        if len(self.zmienneNiezalezneEntry.curselection()) > 0:
+            # Usunięcie zmiennej z listboxa zmiennych niezależnych
+            self.zmienneNiezalezneEntry.delete(tkinter.ACTIVE)
+        else:
+            messagebox.showerror("Błąd", "Nie wybrano żadnej zmiennej do usunięcia.")
+
+    def loadCsvFile(self):
+        # Obsługa błędów przy wczytywaniu pliku CSV:
+        # 1. ValueError(Warość jest pusta) jest wywoływany w tej funkcji.
+        # 2. FileNotFoundError(Plik nie istnieje) oraz FileExistsError(plik nie kończy sie na .csv) są wywoływane w module from_csv.py.
+
+        try:
+            if self.csvEntry.get() == "":
+                raise ValueError("Nazwa pliku CSV nie może być pusta.")
+
+            # Przetworzenie ścieżki
+            basic_path = os.path.dirname(__file__)
+            full_path = os.path.join(basic_path, self.csvEntry.get())
+
+        except ValueError as e:
+            messagebox.showerror("Błąd", str(e))
+        except FileNotFoundError as e:
+            messagebox.showerror("Błąd", str(e))
+        except FileExistsError as e:
+            messagebox.showerror("Błąd", str(e))
+
+        else:
+            dataDict = from_csv.read_csv(full_path)
+            self.SlownikZeWszystkimiZmiennymi = dataDict
+            for key in dataDict.keys():
+                self.wszystkieZmienneLista.insert(tkinter.END, key)
+
+            messagebox.showinfo("Sukces", "Plik CSV został wczytany pomyślnie." +
+                                "\n" + "Teraz już możesz wybrać zmienne.")
+            self.csvEntry.delete(0, tkinter.END)
 
 
 object1 = LinearRegressionApp()
