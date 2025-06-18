@@ -1,50 +1,156 @@
 from Matrices import *
 from statistics import *
+from math import gamma, pi
 
-def multiple_regression(*args: list, y_arg: list):
+def multiple_regression(*x_args: list, y: list):
     
-    max_len = max(len(argument) for argument in args)
-    if any(len(argument) != max_len for argument in args):
-        raise IndexError()
-    if len(y_arg) != max_len:
-        raise IndexError()
+    max_len = max(len(argument) for argument in x_args)
+    if any(len(argument) != max_len for argument in x_args):
+        raise IndexError("Wszystkie zmienne niezalezne musza miec ta sama dlugosc")
+    if len(y) != max_len:
+        raise IndexError("Zmienna zalezna musi miec taka sama dlugosc jak zmienne niezalezne")
 
-    x = Matrix(n_cols=1, n_rows=max_len,values=[1 for _ in range(0,max_len)])
-    y = Matrix(n_cols=1,n_rows=max_len,values=y_arg)
+    x = Matrix(n_cols=1, n_rows=max_len,values=[1] * max_len)
+    y = Matrix(n_cols=1,n_rows=max_len,values=y)
     
-    for arg in args:
+    for arg in x_args:
         x.append(values=arg, by_row=False)
+    
+    xtx = x.transpose() * x
+    xtx_inv_xt = xtx.inverse() * x.transpose() 
+    beta_hat = xtx_inv_xt * y
+    return beta_hat.values
 
-    return ((x.transpose() * x).inverse() * x.transpose() * y).values
+def calculate_covariance_matrix(m: Matrix):
+    return (m.transpose() * m).inverse()
 
 class Regression:
     def __init__(self,*samples,y):
         self.x = samples
         self.y = y
-        self.parameters = multiple_regression(*self.x, y_arg=y)
-        self.res = self.residues()
+        self.beta_hat = multiple_regression(*self.x, y=y)
+        self.n = len(y)
+        self.k = len(self.x)
+        c = Matrix(n_cols=1, n_rows=self.n,values=[1] * self.n)
+        for arg in self.x:
+            c.append(values=arg, by_row=False)
+        self.covariance_matrix = calculate_covariance_matrix(c)
+        self.residuals = self.calcuate_residuals()
 
-    def residues(self):
-        residues = []
+    def calcuate_residuals(self):
+        reisduals = []
         y_hat = []
         for i in range(0, len(self.y)):
-            u_hat = self.parameters[0]
-            for j in range(1, len(self.parameters)):
-                u_hat += self.parameters[j] * self.x[j-1][i]
-            residues.append(self.y[i] - (u_hat))
+            u_hat = self.beta_hat[0]
+            for j in range(1, len(self.beta_hat)):
+                u_hat += self.beta_hat[j] * self.x[j-1][i]
+            reisduals.append(self.y[i] - (u_hat))
             y_hat.append(u_hat)
 
         self.y_hat = y_hat
-        return residues
+        return reisduals
+    
+    def estimate(sef, *x_args):
+        pass
+    
+    def sse(self):
+        return sum(e**2 for e in self.residuals)
     
     def ssr(self):
-        return sum(e**2 for e in self.res)
+        y_bar = mean(self.y)
+        return sum((y_hat_i - y_bar)**2 for y_hat_i in self.y_hat)
+    
+    def sst(self):
+        y_bar = mean(self.y)
+        return sum((y_i - y_bar)**2 for y_i in self.y)
     
     def r_sq(self):
-        return variance(self.y_hat)/variance(self.y)
+        y_var = variance(self.y)
+        if y_var == 0:
+            raise Exception
+        
+        return 1 - self.sse()/self.sst() 
     
-    def phi_sq(self):
-        return self.ssr()/(variance(self.y)*len(self.y))
+    def calculate_squared_residual_error(self):
+        return self.sse()/(self.n - self.k - 1)
+    
+    def beta_error(self, beta_index: int):
+        return (self.covariance_matrix.access_element(beta_index,beta_index) * self.calculate_squared_residual_error())**0.5
+    
+    """performs t test for any beta coefficient with statistical significance equal to 5%"""
+    def t_test_for_parameter_sifnificance(self, beta_index: int):
+        if beta_index > self.k:
+            raise IndexError("Beta index out of range.")
 
+        beta_hat = self.beta_hat[beta_index]
 
+        t = beta_hat / self.beta_error(beta_index)
+        return {'t': t, 'significant': abs(t) > student_critical_values(self.n - self.k - 1)}
+    
+    """calculates a confidence interval for any beta coefficient in model with statistical significance equal to 5%"""
+    def calcuate_confidence_interval_for_beta(self, beta_index: int):
+        if beta_index > self.k:
+            raise IndexError("Beta index out of range.")
+        
+        beta_error = self.beta_error(beta_index)
+        beta_hat = self.beta_hat[beta_index]
+        t_critical = student_critical_values(self.n - self.k - 1)
 
+        return (beta_hat - beta_error * t_critical, beta_hat + beta_error * t_critical)
+    
+    def f_test_for_significance(self):
+        r_sq = self.r_sq()    
+
+        m_1 = self.k
+        m_2 = self.n - self.k - 1
+
+        return (r_sq * m_2)/((1-r_sq) * m_1)
+    
+    def __str__(self):
+        string = f'Regresja metodą klasycznych kwadratów dla n={self.n}, k={self.k}\n'
+        string += '           parametr      blad st.       test-t\n'
+        string += '----------------------------------------------\n'
+        i = 0
+        for index in range(self.k + 1):
+            if i == 0:
+                string += f'{"stala": <11}'
+            else:
+                string += f'{f"x{i}": <11}'
+            i += 1
+            string += f'{f"{self.beta_hat[index]:.4f}": <14}'
+            string += f'{f"{self.beta_error(index):.4f}": <15}'
+            t_test = self.t_test_for_parameter_sifnificance(index)
+            string += f'{f"{t_test["t"]:.4f}": <10}'
+            asterisks = '***' if t_test["significant"] == True else ''
+            string += f'{f"{asterisks}": <9}\n'
+        string += (' ' * 46) + '\n'
+        string += f'{f"y_bar": <12}' + f'{f"{mean(self.y):.4f}": >9}' + '  ' + f'{f"SSR": <12}' f'{f"{self.ssr():.4f}": >12}\n'
+        string += f'{f"SSE": <12}' + f'{f"{self.sse():.4f}": >9}' + '  ' + f'{f"SST": <12}' f'{f"{self.sst():.4f}": >12}\n'
+        string += f'{f"R-kwadrat": <12}' + f'{f"{self.r_sq():.4f}": >9}' + '  '+ f'{f"Test-F": <12}' f'{f"{self.f_test_for_significance():.4f}": >12}\n'
+        return string
+
+"""returns critical values from stidents distribution for alpha = 5%"""
+def student_critical_values(df: int):
+    critical_values = [
+    12.7062, 4.3027, 3.1824, 2.7764, 2.5706, 2.4469, 2.3646, 2.3060, 2.2622, 2.2281,
+    2.2010, 2.1788, 2.1604, 2.1448, 2.1314, 2.1199, 2.1098, 2.1009, 2.0930, 2.0860,
+    2.0796, 2.0739, 2.0687, 2.0639, 2.0595, 2.0555, 2.0518, 2.0484, 2.0452, 2.0423,
+    2.0395, 2.0369, 2.0345, 2.0322, 2.0301, 2.0281, 2.0262, 2.0244, 2.0227, 2.0211,
+    2.0195, 2.0181, 2.0167, 2.0154, 2.0141, 2.0129, 2.0117, 2.0106, 2.0096, 2.0086,
+    2.0076, 2.0066, 2.0057, 2.0049, 2.0040, 2.0032, 2.0025, 2.0017, 2.0010, 2.0003,
+    1.9996, 1.9990, 1.9983, 1.9977, 1.9971, 1.9966, 1.9960, 1.9955, 1.9950, 1.9944,
+    1.9939, 1.9934, 1.9930, 1.9925, 1.9921, 1.9917, 1.9913, 1.9909, 1.9905, 1.9901,
+    1.9897, 1.9893, 1.9890, 1.9886, 1.9883, 1.9879, 1.9876, 1.9873, 1.9870, 1.9867,
+    1.9864, 1.9861, 1.9858, 1.9855, 1.9852, 1.9850, 1.9847, 1.9845, 1.9842, 1.9840,
+    1.9837, 1.9835, 1.9833, 1.9830, 1.9828, 1.9826, 1.9824, 1.9822, 1.9819, 1.9817,
+    1.9815, 1.9813, 1.9811, 1.9809, 1.9808, 1.9806, 1.9804, 1.9802, 1.9800, 1.9799,
+    1.9797, 1.9795, 1.9793, 1.9600
+    ]
+
+    if df <= 0:
+        raise Exception('Wartość stopni swobody musi być dodatnia')
+
+    if df > 120:
+        df = 121
+    
+    return critical_values[df - 1]
