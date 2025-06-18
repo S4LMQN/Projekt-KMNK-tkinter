@@ -1,6 +1,5 @@
 from Matrices import *
 from statistics import *
-from math import gamma, pi
 
 def multiple_regression(*x_args: list, y: list):
     
