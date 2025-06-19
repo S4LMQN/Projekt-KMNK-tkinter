@@ -106,29 +106,34 @@ class Regression:
         return (r_sq * m_2)/((1-r_sq) * m_1)
     
     def __str__(self):
-        string = f'Regresja metodą klasycznych kwadratów dla n={self.n}, k={self.k}\n'
-        string += '           parametr      blad st.       test-t\n'
-        string += '----------------------------------------------\n'
+        string = f'Regresja metodą klasycznych kwadratów dla n={self.n}, k={self.k}\n\n'
+        string += '                parametr'+'      błąd st.'+'  dolny przed.'+'  górny przed.'+'        test-t\n'
+        string += '------------------------'+'--------------'+'--------------'+'--------------'+'--------------\n'
+        #disp len 24,14,14,14,14 = 28
         i = 0
         for index in range(self.k + 1):
             if i == 0:
-                string += f'{"stala": <11}'
+                string += f'{"stala": <12}'
             else:
-                string += f'{f"x{i}": <11}'
+                string += f'{f"x{i}": <12}'
             i += 1
-            string += f'{f"{self.beta_hat[index]:.4f}": <14}'
-            string += f'{f"{self.beta_error(index):.4f}": <15}'
-            t_test = self.t_test_for_parameter_sifnificance(index)
-            string += f'{f"{t_test["t"]:.4f}": <10}'
+            string += f'{f"{self.beta_hat[index]:.4f}": >12}'
+            string += f'{f"{self.beta_error(index):.4f}": >14}'
+            interval = self.calculate_confidence_interval(index)
+            string += f'{f"{interval[0]:.4f}": >14}'
+            string += f'{f"{interval[1]:.4f}": >14}'
+            t_test = self.t_test(index)
+            string += f'{f"{t_test["t"]:.4f}": >14}'
             asterisks = '***' if t_test["significant"] == True else ''
-            string += f'{f"{asterisks}": <9}\n'
+            string += f'{f"{asterisks}": >9}\n'
         string += (' ' * 46) + '\n'
-        string += f'{f"y_bar": <12}' + f'{f"{mean(self.y):.4f}": >9}' + '  ' + f'{f"SSR": <12}' f'{f"{self.ssr():.4f}": >12}\n'
-        string += f'{f"SSE": <12}' + f'{f"{self.sse():.4f}": >9}' + '  ' + f'{f"SST": <12}' f'{f"{self.sst():.4f}": >12}\n'
-        string += f'{f"R-kwadrat": <12}' + f'{f"{self.r_sq():.4f}": >9}' + '  '+ f'{f"Test-F": <12}' f'{f"{self.f_test_for_significance():.4f}": >12}\n'
+        string += f'{f"y_bar": <15}' + f'{f"{mean(self.y):.4f}": >24}' + '  ' + f'{f"SSR": <15}' f'{f"{self.ssr():.4f}": >24}\n'
+        string += f'{f"SSE": <15}' + f'{f"{self.sse():.4f}": >24}' + '  ' + f'{f"SST": <15}' f'{f"{self.sst():.4f}": >24}\n'
+        string += f'{f"R-kwadrat": <15}' + f'{f"{self.r_sq():.4f}": >24}' + '  '+ f'{f"MSE": <15}' f'{f"{self.calculate_squared_residual_error()**0.5:.4f}": >24}\n'
+        string += f'{f"t(0.05,{self.n-self.k-1})": <15}' + f'{f"{student_critical_values(self.n-self.k-1):.4f}": >24}' + '  '+ f'{f"Test-F": <15}' f'{f"{self.f_test():.4f}": >24}\n'
         return string
 
-"""returns critical values from stidents distribution for alpha = 5%"""
+"""Zwraca wartość krytyczną rozkładu t-studenta dla poziomu ufności 0.95"""
 def student_critical_values(df: int):
     critical_values = [
     12.7062, 4.3027, 3.1824, 2.7764, 2.5706, 2.4469, 2.3646, 2.3060, 2.2622, 2.2281,
