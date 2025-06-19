@@ -12,3 +12,6 @@
 - Frontend: Widok i funkcjonalność wczytywania danych z pliku CSV (`buildCsvFrame`)zostało zrobione w całości i jest gotowe.
 - Frontend: Widok i funkcjonalność wybierania zmiennych zależnych i niezależnych (`buildVariableFrame`) zostało zrobione w całości i jest gotowe.
 - (SUGESTIA): Klasa tworząca całą aplikację (`LinearRegressionApp`), ma atrybuty (`ZmiennaZaleznaDoRegresji`, `ZmienneNiezalezneDoRegresji`) to właśnie one są wynikiem działania finalnego wyboru zmiennych. Przypisanie poprawnych wartości następuje po kliknięciu przycisku '`Uruchom regresję`', w metodzie `buildRegressionWindow` Przechowują nazwy kluczy ze słownika (`SlownikZeWszystkimiZmiennymi`), dzięki temu przekazanie wybranych zmiennych do metod wykonywania regresji będzie prostsze.
+
+### 19.05.2025
+- Backend: Zmodyfikowano wyświetlanie obiektu klasy Regression
