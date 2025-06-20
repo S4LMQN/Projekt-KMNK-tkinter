@@ -1,5 +1,7 @@
 from Matrices import *
 from statistics import *
+from math import gamma, pi
+
 
 def multiple_regression(*, y: list, x_args: list):
     
@@ -38,7 +40,7 @@ class Regression:
             c.append(values=arg, by_row=False)
         self.covariance_matrix = calculate_covariance_matrix(c)
         self.residuals = self.calcuate_residuals()
-        
+
     def calcuate_residuals(self):
         reisduals = []
         y_hat = []
@@ -80,7 +82,7 @@ class Regression:
         return (self.covariance_matrix.access_element(beta_index,beta_index) * self.calculate_squared_residual_error())**0.5
     
     """performs t test for any beta coefficient with statistical significance equal to 5%"""
-    def t_test_for_parameter_sifnificance(self, beta_index: int):
+    def t_test(self, beta_index: int):
         if beta_index > self.k:
             raise IndexError("Beta index out of range.")
 
@@ -90,7 +92,7 @@ class Regression:
         return {'t': t, 'significant': abs(t) > student_critical_values(self.n - self.k - 1)}
     
     """calculates a confidence interval for any beta coefficient in model with statistical significance equal to 5%"""
-    def calcuate_confidence_interval_for_beta(self, beta_index: int):
+    def calculate_confidence_interval(self, beta_index: int):
         if beta_index > self.k:
             raise IndexError("Beta index out of range.")
         
@@ -100,7 +102,7 @@ class Regression:
 
         return (beta_hat - beta_error * t_critical, beta_hat + beta_error * t_critical)
     
-    def f_test_for_significance(self):
+    def f_test(self):
         r_sq = self.r_sq()    
 
         m_1 = self.k
@@ -109,7 +111,7 @@ class Regression:
         return (r_sq * m_2)/((1-r_sq) * m_1)
     
     def __str__(self):
-        string = f'Regresja metodą klasycznych kwadratów dla n={self.n}, k={self.k}\n\n'
+        string = f'Regresja metodą klasycznych kwadratów dla zmiennej {self.y_label}. n={self.n}, k={self.k}\n\n'
         string += '                parametr'+'      błąd st.'+'  dolny przed.'+'  górny przed.'+'        test-t\n'
         string += '------------------------'+'--------------'+'--------------'+'--------------'+'--------------\n'
         #disp len 24,14,14,14,14 = 28
@@ -118,7 +120,7 @@ class Regression:
             if i == 0:
                 string += f'{"stala": <12}'
             else:
-                string += f'{f"x{i}": <12}'
+                string += f'{f"{self.x_labels[index-1]}": <12}'
             i += 1
             string += f'{f"{self.beta_hat[index]:.4f}": >12}'
             string += f'{f"{self.beta_error(index):.4f}": >14}'
@@ -136,7 +138,7 @@ class Regression:
         string += f'{f"t(0.05,{self.n-self.k-1})": <15}' + f'{f"{student_critical_values(self.n-self.k-1):.4f}": >24}' + '  '+ f'{f"Test-F": <15}' f'{f"{self.f_test():.4f}": >24}\n'
         return string
 
-"""Zwraca wartość krytyczną rozkładu t-studenta dla poziomu ufności 0.95"""
+"""returns critical values from stidents distribution for alpha = 5%"""
 def student_critical_values(df: int):
     critical_values = [
     12.7062, 4.3027, 3.1824, 2.7764, 2.5706, 2.4469, 2.3646, 2.3060, 2.2622, 2.2281,
@@ -151,13 +153,22 @@ def student_critical_values(df: int):
     1.9864, 1.9861, 1.9858, 1.9855, 1.9852, 1.9850, 1.9847, 1.9845, 1.9842, 1.9840,
     1.9837, 1.9835, 1.9833, 1.9830, 1.9828, 1.9826, 1.9824, 1.9822, 1.9819, 1.9817,
     1.9815, 1.9813, 1.9811, 1.9809, 1.9808, 1.9806, 1.9804, 1.9802, 1.9800, 1.9799,
-    1.9797, 1.9795, 1.9793, 1.9600
+    1.9797, 1.9795, 1.9793, 1.9719, 1.9647, 1.9600
     ]
 
     if df <= 0:
         raise Exception('Wartość stopni swobody musi być dodatnia')
-
-    if df > 120:
+    elif df <= 120:
+        df = df
+    elif 200 > df > 120:
         df = 121
+    elif 500 > df >= 200:
+        df = 122
+    elif 1000 > df >= 500:
+        df = 123
+    elif df >= 1000:
+        df = 124
+    else:
+        df = 125
     
     return critical_values[df - 1]
