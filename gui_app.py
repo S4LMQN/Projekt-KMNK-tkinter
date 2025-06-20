@@ -12,7 +12,7 @@ class LinearRegressionApp():
         # Tworzenie głównego okna aplikacji
         self.window = tkinter.Tk()
         self.window.title("Regresja liniowa")
-        self.window.geometry("800x800")
+        self.window.geometry("600x700")
 
         # W procesie wybierania zmiennch powstają pola klasy, które przechowują wybrane przez użytkownika zmienne
         # Ułatwi to późniejsze przekazywanie ich do funkcji regresji liniowej.
@@ -43,9 +43,9 @@ class LinearRegressionApp():
             height=100,
         )
         csvFrame.pack(
-            anchor='nw',
+            anchor='n',
             padx=25,
-            pady=70
+            pady=15
         )
         # Zapobiega zmianie rozmiaru okna na podstawie jego zawartości
         csvFrame.pack_propagate(False)
@@ -99,7 +99,7 @@ class LinearRegressionApp():
             height=450
         )
         variableFrame.pack(
-            side="left",
+            side="top",
             padx=25
         )
         # Zapobiega zmianie rozmiaru okna na podstawie jego zawartości
@@ -300,12 +300,12 @@ class LinearRegressionApp():
             self.window,
             text="Uruchom regresję",
             command=self.buildRegressionWindow,
-            bg="white",
+            bg="lightgrey",
             font=("Arial", 12)
         )
         startRegressionButton.pack(
             side="bottom",
-            pady=20
+            pady=30
         )
 
     # Funkcja budująca okno z wynikami regresji liniowej
