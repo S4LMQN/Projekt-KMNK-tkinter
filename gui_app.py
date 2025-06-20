@@ -358,6 +358,8 @@ class LinearRegressionApp():
             messagebox.showerror("Błąd", str(e))
         except FileExistsError as e:
             messagebox.showerror("Błąd", str(e))
+        except TypeError as e:
+            messagebox.showerror("Błąd", str(e))
 
         else:
             try:
