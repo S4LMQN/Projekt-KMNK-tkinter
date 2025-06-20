@@ -1,10 +1,9 @@
 import csv
 from os import path
-import re
 
 def read_csv(file_path):
 
-    if not re.match(r'.*\.csv$', file_path):
+    if not file_path.endswith(".csv"):
         raise FileExistsError("Plik nie jest typu .csv")
         
     if not path.exists(file_path):
