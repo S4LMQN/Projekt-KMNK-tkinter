@@ -1,6 +1,6 @@
 from Matrices import *
 from statistics import *
-from math import gamma, pi
+from copy import deepcopy
 
 
 def multiple_regression(*, y: list, x_args: list):
@@ -29,9 +29,10 @@ def calculate_covariance_matrix(m: Matrix):
 class Regression:
     def __init__(self,*,samples: dict, y_label: str, x_labels: list):
         self.y_label = y_label
-        self.y = samples.pop(y_label)
-        self.x_labels = [key for key in samples.keys() if key in x_labels]
-        self.x = list(samples[key] for key in self.x_labels)
+        samples_cp = deepcopy(samples)
+        self.y = samples_cp.pop(y_label)
+        self.x_labels = [key for key in samples_cp.keys() if key in x_labels]
+        self.x = list(samples_cp[key] for key in self.x_labels)
         self.beta_hat = multiple_regression(y=self.y,x_args=self.x)
         self.n = len(self.y)
         self.k = len(self.x)
