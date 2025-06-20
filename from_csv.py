@@ -14,10 +14,13 @@ def read_csv(file_path):
         d = csv.DictReader(f, delimiter=';')
         for row in d:
             for key, value in row.items():
-                if key not in dictionary.keys():
-                    dictionary[key] = [value]
-                else:
-                    dictionary[key].append(value)
+                if type(value) == str:
+                    if key not in dictionary.keys():
+                        dictionary[key] = [value]
+                    else:
+                        dictionary[key].append(value)
+                else: 
+                    raise TypeError("Błędna wartość lub nierówna długość kolumn")
     
     return dictionary
 
