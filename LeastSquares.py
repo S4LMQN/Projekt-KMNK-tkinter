@@ -1,7 +1,7 @@
 from Matrices import *
 from statistics import *
 
-def multiple_regression(*x_args: list, y: list):
+def multiple_regression(*, y: list, x_args: list):
     
     max_len = max(len(argument) for argument in x_args)
     if any(len(argument) != max_len for argument in x_args):
@@ -11,7 +11,7 @@ def multiple_regression(*x_args: list, y: list):
 
     x = Matrix(n_cols=1, n_rows=max_len,values=[1] * max_len)
     y = Matrix(n_cols=1,n_rows=max_len,values=y)
-    
+
     for arg in x_args:
         x.append(values=arg, by_row=False)
     
@@ -23,19 +23,22 @@ def multiple_regression(*x_args: list, y: list):
 def calculate_covariance_matrix(m: Matrix):
     return (m.transpose() * m).inverse()
 
+"""Przyjmuje słownik prób, nazwę y będącą napisem, listę nazw zmiennych x."""
 class Regression:
-    def __init__(self,*samples,y):
-        self.x = samples
-        self.y = y
-        self.beta_hat = multiple_regression(*self.x, y=y)
-        self.n = len(y)
+    def __init__(self,*,samples: dict, y_label: str, x_labels: list):
+        self.y_label = y_label
+        self.y = samples.pop(y_label)
+        self.x_labels = [key for key in samples.keys() if key in x_labels]
+        self.x = list(samples[key] for key in self.x_labels)
+        self.beta_hat = multiple_regression(y=self.y,x_args=self.x)
+        self.n = len(self.y)
         self.k = len(self.x)
         c = Matrix(n_cols=1, n_rows=self.n,values=[1] * self.n)
         for arg in self.x:
             c.append(values=arg, by_row=False)
         self.covariance_matrix = calculate_covariance_matrix(c)
         self.residuals = self.calcuate_residuals()
-
+        
     def calcuate_residuals(self):
         reisduals = []
         y_hat = []
