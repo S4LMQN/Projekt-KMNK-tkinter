@@ -196,10 +196,10 @@ class LinearRegressionApp():
             pady=3
         )
 
-        # Label, tekst: Zmienne zależne (X)
+        # Label, tekst: Zmienne niezależne (X)
         wybranaZmiennaZaleznaLabel = tkinter.Label(
             wybranaZmiennaZaleznaFrame,
-            text="Zmienne zależne (X)",
+            text="Zm. niezależne (X)",
             bg="lightgrey",
             font=("Arial", 10)
         )
