@@ -394,6 +394,11 @@ class LinearRegressionApp():
             messagebox.showerror("Błąd", "Musisz wybrać zmienną zależną i przynajmniej jedną niezależną.")
             return
 
+         # Sprawdzenie czy zmienna zależna nie jest wśród zmiennych niezależnych
+        if self.ZmiennaZaleznaDoRegresji in self.ZmienneNiezalezneDoRegresji:
+            messagebox.showerror("Błąd", "Zmienna zależna nie może być jednocześnie zmienną niezależną.")
+            return
+
     # Tworzenie nowego okna
         regressionWindow = tkinter.Toplevel(self.window)
         regressionWindow.title("Regresja liniowa")
