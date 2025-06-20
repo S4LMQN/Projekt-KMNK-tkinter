@@ -281,19 +281,6 @@ class LinearRegressionApp():
             pady=5
         )
 
-        # Label, tekst: Zmienne niezależne (X)
-        zmiennaNiezaleznaLabel = tkinter.Label(
-            variableFrame,
-            text="Zmienne niezależne (X)",
-            bg="lightgrey",
-            font=("Arial", 10)
-        )
-        zmiennaNiezaleznaLabel.pack(
-            anchor='ne',
-            padx=5,
-            pady=50
-        )
-
     # Funkcja budująca przycisk do uruchomienia regresji liniowej
 
     def buildRegressionButton(self):
