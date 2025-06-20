@@ -1,6 +1,3 @@
-# How to destroy an object?
-
-
 class Matrix:
     __slots__ = ('__values', '__row_index', '__n_cols', '__n_rows')
     def __init__(self, *, n_cols: int, n_rows: int, values):
