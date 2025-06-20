@@ -7,6 +7,7 @@
 - Z listy użytkownik wybiera odpowiednio zmienną objaśnianą oraz zmienne objaśniające przekazywane do odpowiednich pól
 - Po kliknięciu przycisku w oddzielnym oknie wypisywane są dane modelu, w tym parametry strukturalne, błędy standardowe, przedziały ufności i test t-studenta.  
 - Zmienna objaśniana nie może być jednocześnie zmienną objaśniającą
+- Po wygenerowaniu modelu można zmienić dobór zmiennych
 
 ### 17.06.2025
 *co zostało zrobione?*
