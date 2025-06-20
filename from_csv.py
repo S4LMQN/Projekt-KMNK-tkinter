@@ -21,3 +21,11 @@ def read_csv(file_path):
                     dictionary[key].append(float(value))
     
     return dictionary
+
+def clean(raw_vals):
+    cleaned = []
+    for item in raw_vals:
+        item = item.replace("\xa0", "")
+        num = float(item.replace(" ", ""))
+        cleaned.append(num)
+    return cleaned
