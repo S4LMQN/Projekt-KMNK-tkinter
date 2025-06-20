@@ -16,8 +16,8 @@ def read_csv(file_path):
         for row in d:
             for key, value in row.items():
                 if key not in dictionary.keys():
-                    dictionary[key] = [value]
+                    dictionary[key] = [float(value)]
                 else:
-                    dictionary[key].append(value)
+                    dictionary[key].append(float(value))
     
     return dictionary
