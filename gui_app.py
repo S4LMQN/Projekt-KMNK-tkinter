@@ -309,38 +309,6 @@ class LinearRegressionApp():
             pady=30
         )
 
-    # Funkcja budująca okno z wynikami regresji liniowej
-    def buildRegressionWindow(self):
-
-        # Przypisanie wybranych zmiennych do pól klasy
-        self.ZmiennaZaleznaDoRegresji = self.zmiennaZaleznaEntry.cget('text')
-        self.ZmienneNiezalezneDoRegresji = list(self.zmienneNiezalezneEntry.get(0, tkinter.END))
-
-        # Tworzenie nowego okna
-        regressionWindow = tkinter.Toplevel(self.window)
-        regressionWindow.title("Regresja liniowa")
-        regressionWindow.geometry("800x500")
-
-        # Konfiguracja okna
-        # Okno będzie zawsze na wierzchu okna głównego
-        regressionWindow.transient(self.window)
-        # Blokuje interakcję z głównym oknem, dopóki to nie zostanie zamknięte
-        regressionWindow.grab_set()
-        # Zapobiega zmianie rozmiaru okna na podstawie jego zawartości
-        regressionWindow.pack_propagate(False)
-
-        # Label, Tekst: Regresja liniowa
-        headerLabel = tkinter.Label(
-            regressionWindow,
-            text="Wyniki regresji",
-            font=("Arial", 16, "bold"),
-        )
-        headerLabel.pack(
-            side="top",
-            pady=10
-        )
-
-
     def WypiszWybranaZmiennaZalezna(self):
         if len(self.wszystkieZmienneLista.curselection()) > 0:
             # Pobranie wybranej zmiennej z label
@@ -379,6 +347,14 @@ class LinearRegressionApp():
         # Obsługa błędów przy wczytywaniu pliku CSV:
         # 1. ValueError(Warość jest pusta) jest wywoływany w tej funkcji.
         # 2. FileNotFoundError(Plik nie istnieje) oraz FileExistsError(plik nie kończy sie na .csv) są wywoływane w module from_csv.py.
+        # Czyszczenie poprzednich zmiennych i pól
+        self.wszystkieZmienneLista.delete(0, tkinter.END)
+        self.zmiennaZaleznaEntry.config(text="")
+        self.zmienneNiezalezneEntry.delete(0, tkinter.END)
+        self.ZmiennaZaleznaDoRegresji = None
+        self.ZmienneNiezalezneDoRegresji = []
+        self.SlownikZeWszystkimiZmiennymi = {}
+
 
         try:
             if self.csvEntry.get() == "":
@@ -387,6 +363,7 @@ class LinearRegressionApp():
             # Przetworzenie ścieżki
             basic_path = os.path.dirname(__file__)
             full_path = os.path.join(basic_path, self.csvEntry.get())
+            dataDict = from_csv.read_csv(full_path)
 
         except ValueError as e:
             messagebox.showerror("Błąd", str(e))
@@ -397,7 +374,6 @@ class LinearRegressionApp():
 
         else:
             try:
-                dataDict = from_csv.read_csv(full_path)
                 self.SlownikZeWszystkimiZmiennymi = {key: from_csv.clean(value) for key, value in dataDict.items()}
                 for key in dataDict.keys():
                     self.wszystkieZmienneLista.insert(tkinter.END, key)
@@ -421,7 +397,7 @@ class LinearRegressionApp():
     # Tworzenie nowego okna
         regressionWindow = tkinter.Toplevel(self.window)
         regressionWindow.title("Regresja liniowa")
-        regressionWindow.geometry("800x500")
+        regressionWindow.geometry("1100x600")
 
     # Konfiguracja okna
         regressionWindow.transient(self.window)
@@ -441,16 +417,14 @@ class LinearRegressionApp():
 
     # Tworzenie obiektu Regression i wyświetlenie wyników
         try:
-            if self.ZmiennaZaleznaDoRegresji in self.ZmienneNiezalezneDoRegresji:
-                raise Exception('Zmienna zależna nie może zostać równocześnie wybrana jako zmienna niezależna')
-        # Utworzenie obiektu regresji
+            # Utworzenie obiektu regresji
             regresja = Regression(samples=self.SlownikZeWszystkimiZmiennymi, y_label=self.ZmiennaZaleznaDoRegresji, x_labels=self.ZmienneNiezalezneDoRegresji)
         
-        # Tworzenie pola tekstowego z wynikami
+            # Tworzenie pola tekstowego z wynikami
             results_text = tkinter.Text(
                 regressionWindow,
                 wrap=tkinter.WORD,
-                font=("Courier New", 13)  # Używamy czcionki o stałej szerokości dla lepszego formatowania
+                font=("Courier New", 14)  # Używamy czcionki o stałej szerokości dla lepszego formatowania
             )
             results_text.pack(
                 expand=True,
@@ -459,11 +433,11 @@ class LinearRegressionApp():
                 pady=10
             )
         
-        # Wstawienie wyników do pola tekstowego
+            # Wstawienie wyników do pola tekstowego
             results_text.insert(tkinter.END, str(regresja))
             results_text.config(state=tkinter.DISABLED)  # Blokowanie edycji
         
-        # Dodanie paska przewijania
+            # Dodanie paska przewijania
             scrollbar = tkinter.Scrollbar(results_text)
             scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
             results_text.config(yscrollcommand=scrollbar.set)
@@ -471,5 +445,7 @@ class LinearRegressionApp():
         
         except Exception as e:
             messagebox.showerror("Błąd", f"Wystąpił błąd podczas obliczeń: {str(e)}")
+            
 
 object1 = LinearRegressionApp()
+
