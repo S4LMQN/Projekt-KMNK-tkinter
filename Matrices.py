@@ -1,12 +1,12 @@
 class Matrix:
     __slots__ = ('__values', '__row_index', '__n_cols', '__n_rows')
     def __init__(self, *, n_cols: int, n_rows: int, values):
-        if type(n_cols) != int or type(n_rows) != int:
-            raise TypeError('Dimensions have to be represented by integer values!')
+        if n_cols <= 0 or n_rows <= 0:
+            raise TypeError('Wymiary muszą być reprezentowane przez wartości dodanie.')
         elif type(values) not in (list, tuple):
-            raise TypeError('Values have to be in the form of tuple or list!')
+            raise TypeError('Wartości muszą być w postaci listy lub krotki.')
         elif n_cols * n_rows != len(values):
-            raise IndexError(f'Given number of values is {len(values)}, but according to dimensions it should be {n_cols * n_rows}.')
+            raise IndexError(f'Liczba wartości w liście to {len(values)}, ale według podanych wymiarów powinna wynosić {n_cols * n_rows}.')
         else:
             self.__values = list()
             self.__row_index = 0
@@ -82,7 +82,7 @@ class Matrix:
         if any(not isinstance(val, (int, float)) for val in values):
             raise ValueError()
         if len(values) != lengths[by_row]:
-            raise IndexError('Values cannot be appended to matrix because the length of a vec is not equal to length of n_cols or n_rows')
+            raise IndexError('Wartości nie mogą zostać doklejone do macierzy, poniewaz długość listy nie jest zgodna z wielkością macierzy.')
         
         if by_row:
             self.__values += list(values)
@@ -198,7 +198,7 @@ class Matrix:
             args = [val + other for val in self.__values]
         elif type(other) == Matrix:
             if (self.__n_cols != other.__n_cols) or (self.__n_rows != other.__n_rows):
-                raise IndexError('Can\'t add matrices which are not of the same dimensions!')
+                raise IndexError('Nie mozna dodać macierzy o róznych wielkościach!')
             args = [self.__values[i] + other.__values[i] for i in range(len(self.__values))]
         else:
             raise ValueError('Cannot add objects!')
@@ -210,10 +210,10 @@ class Matrix:
             args = [val - other for val in self.__values]
         elif type(other) == Matrix:
             if (self.__n_cols != other.__n_cols) or (self.__n_rows != other.__n_rows):
-                raise IndexError('Can\'t add matrices which are not of the same dimensions!')
+                raise IndexError('Nie mozna odjąć macierzy o róznych wielkościach!')
             args = [self.__values[i] - other.__values[i] for i in range(len(self.__values))]
         else:
-            raise ValueError('Cannot add objects!')
+            raise ValueError('Nie mozna dodać wartości!')
 
         return Matrix(n_cols=self.__n_cols, n_rows=self.__n_rows, values=args)
     
