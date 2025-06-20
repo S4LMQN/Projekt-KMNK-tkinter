@@ -2,6 +2,7 @@ import tkinter
 import from_csv
 import os
 from tkinter import messagebox
+from LeastSquares import Regression
 
 
 class LinearRegressionApp():
@@ -404,5 +405,76 @@ class LinearRegressionApp():
                                 "\n" + "Teraz już możesz wybrać zmienne.")
             self.csvEntry.delete(0, tkinter.END)
 
+    def buildRegressionWindow(self):
+    # Przypisanie wybranych zmiennych do pól klasy
+        self.ZmiennaZaleznaDoRegresji = self.zmiennaZaleznaEntry.cget('text')
+        self.ZmienneNiezalezneDoRegresji = list(self.zmienneNiezalezneEntry.get(0, tkinter.END))
+
+    # Sprawdzenie czy wybrano zmienne
+        if not self.ZmiennaZaleznaDoRegresji or not self.ZmienneNiezalezneDoRegresji:
+            messagebox.showerror("Błąd", "Musisz wybrać zmienną zależną i przynajmniej jedną niezależną.")
+            return
+
+    # Pobranie danych dla wybranych zmiennych
+        try:
+            y = [float(val) for val in self.SlownikZeWszystkimiZmiennymi[self.ZmiennaZaleznaDoRegresji]]
+            x_args = []
+            for zmienna in self.ZmienneNiezalezneDoRegresji:
+                x_args.append([float(val) for val in self.SlownikZeWszystkimiZmiennymi[zmienna]])
+        except ValueError:
+            messagebox.showerror("Błąd", "Dane muszą być liczbami.")
+            return
+
+    # Tworzenie nowego okna
+        regressionWindow = tkinter.Toplevel(self.window)
+        regressionWindow.title("Regresja liniowa")
+        regressionWindow.geometry("800x500")
+
+    # Konfiguracja okna
+        regressionWindow.transient(self.window)
+        regressionWindow.grab_set()
+        regressionWindow.pack_propagate(False)
+
+    # Label, Tekst: Regresja liniowa
+        headerLabel = tkinter.Label(
+            regressionWindow,
+            text="Wyniki regresji",
+            font=("Arial", 16, "bold"),
+        )
+        headerLabel.pack(
+            side="top",
+            pady=10
+        )
+
+    # Tworzenie obiektu Regression i wyświetlenie wyników
+        try:
+        # Utworzenie obiektu regresji
+            regresja = Regression(*x_args, y=y)
+        
+        # Tworzenie pola tekstowego z wynikami
+            results_text = tkinter.Text(
+                regressionWindow,
+                wrap=tkinter.WORD,
+                font=("Courier New", 10)  # Używamy czcionki o stałej szerokości dla lepszego formatowania
+            )
+            results_text.pack(
+                expand=True,
+                fill=tkinter.BOTH,
+                padx=10,
+                pady=10
+            )
+        
+        # Wstawienie wyników do pola tekstowego
+            results_text.insert(tkinter.END, str(regresja))
+            results_text.config(state=tkinter.DISABLED)  # Blokowanie edycji
+        
+        # Dodanie paska przewijania
+            scrollbar = tkinter.Scrollbar(results_text)
+            scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+            results_text.config(yscrollcommand=scrollbar.set)
+            scrollbar.config(command=results_text.yview)
+        
+        except Exception as e:
+            messagebox.showerror("Błąd", f"Wystąpił błąd podczas obliczeń: {str(e)}")
 
 object1 = LinearRegressionApp()
