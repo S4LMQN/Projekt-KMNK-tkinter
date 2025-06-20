@@ -396,14 +396,17 @@ class LinearRegressionApp():
             messagebox.showerror("Błąd", str(e))
 
         else:
-            dataDict = from_csv.read_csv(full_path)
-            self.SlownikZeWszystkimiZmiennymi = dataDict
-            for key in dataDict.keys():
-                self.wszystkieZmienneLista.insert(tkinter.END, key)
+            try:
+                dataDict = from_csv.read_csv(full_path)
+                self.SlownikZeWszystkimiZmiennymi = {key: from_csv.clean(value) for key, value in dataDict.items()}
+                for key in dataDict.keys():
+                    self.wszystkieZmienneLista.insert(tkinter.END, key)
 
-            messagebox.showinfo("Sukces", "Plik CSV został wczytany pomyślnie." +
+                messagebox.showinfo("Sukces", "Plik CSV został wczytany pomyślnie." +
                                 "\n" + "Teraz już możesz wybrać zmienne.")
-            self.csvEntry.delete(0, tkinter.END)
+                self.csvEntry.delete(0, tkinter.END)
+            except ValueError:
+                messagebox.showerror("Błąd", "Dane muszą być liczbami.")
 
     def buildRegressionWindow(self):
     # Przypisanie wybranych zmiennych do pól klasy
@@ -413,16 +416,6 @@ class LinearRegressionApp():
     # Sprawdzenie czy wybrano zmienne
         if not self.ZmiennaZaleznaDoRegresji or not self.ZmienneNiezalezneDoRegresji:
             messagebox.showerror("Błąd", "Musisz wybrać zmienną zależną i przynajmniej jedną niezależną.")
-            return
-
-    # Pobranie danych dla wybranych zmiennych
-        try:
-            y = [float(val) for val in self.SlownikZeWszystkimiZmiennymi[self.ZmiennaZaleznaDoRegresji]]
-            x_args = []
-            for zmienna in self.ZmienneNiezalezneDoRegresji:
-                x_args.append([float(val) for val in self.SlownikZeWszystkimiZmiennymi[zmienna]])
-        except ValueError:
-            messagebox.showerror("Błąd", "Dane muszą być liczbami.")
             return
 
     # Tworzenie nowego okna
@@ -449,13 +442,13 @@ class LinearRegressionApp():
     # Tworzenie obiektu Regression i wyświetlenie wyników
         try:
         # Utworzenie obiektu regresji
-            regresja = Regression(*x_args, y=y)
+            regresja = Regression(samples=self.SlownikZeWszystkimiZmiennymi, y_label=self.ZmiennaZaleznaDoRegresji, x_labels=self.ZmienneNiezalezneDoRegresji)
         
         # Tworzenie pola tekstowego z wynikami
             results_text = tkinter.Text(
                 regressionWindow,
                 wrap=tkinter.WORD,
-                font=("Courier New", 10)  # Używamy czcionki o stałej szerokości dla lepszego formatowania
+                font=("Courier New", 13)  # Używamy czcionki o stałej szerokości dla lepszego formatowania
             )
             results_text.pack(
                 expand=True,
