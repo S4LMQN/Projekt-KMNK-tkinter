@@ -1,4 +1,13 @@
 # Least squares regression GUI app
+### Opis projektu
+- Program oblicza model regresji wielorakiej klasyczną metodą najmniejszych kwadratów
+- Okno główne wymaga podania nazwy pliku (plik nalezy umieścić folderze programu)
+- Jeśli plik nie istnieje lub nie jest o rozszerzeniu .csv, występuje błąd
+- Następuje wypakowanie danych (jeśli spełniają warunki - występują tytuły kolumn oraz pozostałe wartości są liczbowe)
+- Z listy użytkownik wybiera odpowiednio zmienną objaśnianą oraz zmienne objaśniające przekazywane do odpowiednich pól
+- Po kliknięciu przycisku w oddzielnym oknie wypisywane są dane modelu, w tym parametry strukturalne, błędy standardowe, przedziały ufności i test t-studenta.  
+- Zmienna objaśniana nie może być jednocześnie zmienną objaśniającą
+
 ### 17.06.2025
 *co zostało zrobione?*
 - Ramka główna do wybierania zmiennych a w niej zwykłe etykiety tekstowe opisujące przyszłe pola wybranych zmiennych.
