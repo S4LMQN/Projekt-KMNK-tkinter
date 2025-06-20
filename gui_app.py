@@ -441,6 +441,8 @@ class LinearRegressionApp():
 
     # Tworzenie obiektu Regression i wyświetlenie wyników
         try:
+            if self.ZmiennaZaleznaDoRegresji in self.ZmienneNiezalezneDoRegresji:
+                raise Error('Zmienna zależna nie może zostać równocześnie wybrana jako zmienna niezależna')
         # Utworzenie obiektu regresji
             regresja = Regression(samples=self.SlownikZeWszystkimiZmiennymi, y_label=self.ZmiennaZaleznaDoRegresji, x_labels=self.ZmienneNiezalezneDoRegresji)
         
