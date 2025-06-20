@@ -15,3 +15,7 @@
 
 ### 19.05.2025
 - Backend: Zmodyfikowano wyświetlanie obiektu klasy Regression
+
+### 20.05.2025
+- Backend: Zmodyfikowano konstruktor klasy Regression. Przyjmuje słownik nazwa_próby-próba, listę nazw zmiennych objaśniających x, str nazwy zmiennej objaśnianej y.
+- Backend: Dodano funkcję clean(raw_list) w pliku read_csv.py.
