@@ -2,9 +2,9 @@ from Matrices import *
 from statistics import *
 from copy import deepcopy
 
-
 def multiple_regression(*, y: list, x_args: list):
     
+    #Sprawdza czy wszystkie argumenty mają tą samą długość
     max_len = max(len(argument) for argument in x_args)
     if any(len(argument) != max_len for argument in x_args):
         raise IndexError("Wszystkie zmienne niezalezne musza miec ta sama dlugosc")
@@ -22,6 +22,7 @@ def multiple_regression(*, y: list, x_args: list):
     beta_hat = xtx_inv_xt * y
     return beta_hat.values
 
+"""Tworzy macierz kowariancji"""
 def calculate_covariance_matrix(m: Matrix):
     return (m.transpose() * m).inverse()
 
@@ -30,18 +31,31 @@ class Regression:
     def __init__(self,*,samples: dict, y_label: str, x_labels: list):
         self.y_label = y_label
         samples_cp = deepcopy(samples)
-        self.y = samples_cp.pop(y_label)
+        #Wybiera zmienną objaśnianą do modelu
+        try:
+            self.y = samples_cp.pop(y_label)
+        except KeyError as e:
+            raise KeyError('Nie znaleziono zmiennej objaśnianej dla modelu')
+        #Jeśli zmienne są zawarte w liście x_labels, uwzględnia je w modelu
         self.x_labels = [key for key in samples_cp.keys() if key in x_labels]
         self.x = list(samples_cp[key] for key in self.x_labels)
-        self.beta_hat = multiple_regression(y=self.y,x_args=self.x)
+        try:
+            self.beta_hat = multiple_regression(y=self.y,x_args=self.x)
+        except Exception as e:
+            raise Exception("dla podanych wartości niemoliwe jest stworzenie modelu regresji", str(e))
+        
         self.n = len(self.y)
         self.k = len(self.x)
+
+        #Tworzenie i zapisanie macierzy kowariancji potrzebnej do obliczenia błędów estymatorów
         c = Matrix(n_cols=1, n_rows=self.n,values=[1] * self.n)
         for arg in self.x:
             c.append(values=arg, by_row=False)
+
         self.covariance_matrix = calculate_covariance_matrix(c)
         self.residuals = self.calcuate_residuals()
 
+    """Oblicza reszty modelu"""
     def calcuate_residuals(self):
         reisduals = []
         y_hat = []
@@ -58,44 +72,50 @@ class Regression:
     def estimate(sef, *x_args):
         pass
     
+    """Oblicza zmienność niewyjaśnioną"""
     def sse(self):
         return sum(e**2 for e in self.residuals)
     
+    """Oblicza zmiennosć wyjaśnioną"""
     def ssr(self):
         y_bar = mean(self.y)
         return sum((y_hat_i - y_bar)**2 for y_hat_i in self.y_hat)
     
+    """Oblicza całkowitą zmienność"""
     def sst(self):
         y_bar = mean(self.y)
         return sum((y_i - y_bar)**2 for y_i in self.y)
     
+    """Oblicza współczynnik determinacji"""
     def r_sq(self):
         y_var = variance(self.y)
         if y_var == 0:
-            raise Exception
+            raise ValueError
         
         return 1 - self.sse()/self.sst() 
     
+    """Oblicza błąd kwadratowy reszt"""
     def calculate_squared_residual_error(self):
         return self.sse()/(self.n - self.k - 1)
     
+    """Oblicza błąd standardowy parametru strukturalnego"""
     def beta_error(self, beta_index: int):
         return (self.covariance_matrix.access_element(beta_index,beta_index) * self.calculate_squared_residual_error())**0.5
     
-    """performs t test for any beta coefficient with statistical significance equal to 5%"""
+    """Test t istotności parametrów strukturalnych dla poziomu ufności 95%"""
     def t_test(self, beta_index: int):
         if beta_index > self.k:
-            raise IndexError("Beta index out of range.")
+            raise IndexError("Indeks przekroczył długość listy parametrów strukturalnych")
 
         beta_hat = self.beta_hat[beta_index]
 
         t = beta_hat / self.beta_error(beta_index)
         return {'t': t, 'significant': abs(t) > student_critical_values(self.n - self.k - 1)}
     
-    """calculates a confidence interval for any beta coefficient in model with statistical significance equal to 5%"""
+    """Oblicza przedział ufności parametrów strukturalnych dla poziomu ufności 95%"""
     def calculate_confidence_interval(self, beta_index: int):
         if beta_index > self.k:
-            raise IndexError("Beta index out of range.")
+            raise IndexError("Indeks przekroczył długość listy parametrów strukturalnych")
         
         beta_error = self.beta_error(beta_index)
         beta_hat = self.beta_hat[beta_index]
@@ -103,6 +123,7 @@ class Regression:
 
         return (beta_hat - beta_error * t_critical, beta_hat + beta_error * t_critical)
     
+    '''Test F sprawdzający istotność regresji'''
     def f_test(self):
         r_sq = self.r_sq()    
 
@@ -123,24 +144,29 @@ class Regression:
             else:
                 string += f'{f"{self.x_labels[index-1]}": <12}'
             i += 1
-            string += f'{f"{self.beta_hat[index]:.4f}": >12}'
-            string += f'{f"{self.beta_error(index):.4f}": >14}'
+            string += f'{f"{round(self.beta_hat[index],4)}": >12}'
+            string += f'{f"{round(self.beta_error(index),4)}": >14}'
             interval = self.calculate_confidence_interval(index)
-            string += f'{f"{interval[0]:.4f}": >14}'
-            string += f'{f"{interval[1]:.4f}": >14}'
+            string += f'{f"{round(interval[0],4)}": >14}'
+            string += f'{f"{round(interval[1],4)}": >14}'
             t_test = self.t_test(index)
-            string += f'{f"{t_test["t"]:.4f}": >14}'
+            string += f'{f"{round(t_test['t'],4)}": >14}'
             asterisks = '***' if t_test["significant"] == True else ''
             string += f'{f"{asterisks}": >9}\n'
         string += (' ' * 46) + '\n'
-        string += f'{f"y_bar": <15}' + f'{f"{mean(self.y):.4f}": >24}' + '  ' + f'{f"SSR": <15}' f'{f"{self.ssr():.4f}": >24}\n'
-        string += f'{f"SSE": <15}' + f'{f"{self.sse():.4f}": >24}' + '  ' + f'{f"SST": <15}' f'{f"{self.sst():.4f}": >24}\n'
-        string += f'{f"R-kwadrat": <15}' + f'{f"{self.r_sq():.4f}": >24}' + '  '+ f'{f"MSE": <15}' f'{f"{self.calculate_squared_residual_error()**0.5:.4f}": >24}\n'
-        string += f'{f"t(0.05,{self.n-self.k-1})": <15}' + f'{f"{student_critical_values(self.n-self.k-1):.4f}": >24}' + '  '+ f'{f"Test-F": <15}' f'{f"{self.f_test():.4f}": >24}\n'
+        string += f'{f"y_bar": <15}' + f'{f"{round(mean(self.y),4)}": >24}' + '  ' + f'{f"SSR": <15}' f'{f"{round(self.ssr(),4)}": >24}\n'
+        string += f'{f"SSE": <15}' + f'{f"{round(self.sse(),4)}": >24}' + '  ' + f'{f"SST": <15}' f'{f"{round(self.sst(),4)}": >24}\n'
+        string += f'{f"R-kwadrat": <15}' + f'{f"{round(self.r_sq(),4)}": >24}' + '  '+ f'{f"MSE": <15}' f'{f"{round(self.calculate_squared_residual_error()**0.5,4)}": >24}\n'
+        string += f'{f"t(0.05,{self.n-self.k-1})": <15}' + f'{f"{round(student_critical_values(self.n-self.k-1),4)}": >24}' + '  '+ f'{f"Test-F": <15}' f'{f"{round(self.f_test(),4)}": >24}\n'
         return string
 
-"""returns critical values from stidents distribution for alpha = 5%"""
+"""Zwraca wartość krytczną dystrybuanty rozkładu t-studenta dla poziomu ufności 95%"""
 def student_critical_values(df: int):
+    if type(df) not in (int, float):
+        raise TypeError("Wartość stopni swobody musi być typem liczbowym, całkowitym")
+    if df % 1 != 0:
+        raise ValueError("Wartość stopni swobody musi być liczbą całkowitą")
+    
     critical_values = [
     12.7062, 4.3027, 3.1824, 2.7764, 2.5706, 2.4469, 2.3646, 2.3060, 2.2622, 2.2281,
     2.2010, 2.1788, 2.1604, 2.1448, 2.1314, 2.1199, 2.1098, 2.1009, 2.0930, 2.0860,
@@ -167,9 +193,9 @@ def student_critical_values(df: int):
         df = 122
     elif 1000 > df >= 500:
         df = 123
-    elif df >= 1000:
+    elif 2000 > df >= 1000:
         df = 124
     else:
         df = 125
     
-    return critical_values[df - 1]
+    return critical_values[int(df - 1)]
